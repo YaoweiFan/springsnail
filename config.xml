@@ -1,0 +1,12 @@
+Listen 127.0.0.1:8080
+
+<logical_host>
+  <name>36.152.44.96</name>
+  <port>80</port>
+  <conns>2</conns>
+</logical_host>
+<logical_host>
+  <name>36.152.44.95</name>
+  <port>80</port>
+  <conns>2</conns>
+</logical_host>
