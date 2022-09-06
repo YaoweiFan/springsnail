@@ -20,6 +20,32 @@ springsnail 是《Linux 高性能服务器编程》（游双） 附带的项目�
 - 负载均衡的实现  
   每一个工作线程都会创建一个连接管理类 ```mgr``` 对象，这个对象保存和记录：未使用的连接（与服务器的连接）、释放的连接（与服务器的连接）和正在使用的连接（与服务器的连接和与客户端的连接）。工作线程在每一次连接发生变化（正在使用的连接数量发生变化）的时候通知主进程自己的负载状况。主进程记录每个工作进程的负载状况，在分配连接 socket 的时候首先通知负载最低的工作进程。 
 
+- 三组 I/O 复用函数的比较 -- select、poll、epoll
+  ```c
+  #include<sys/select.h>
+  select(int nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptfds, struct timeval* timeout);
+  ```
+  ```c
+  #include<sys/poll.h>
+  int poll(struct pollfd* fds, nfds_t nfds, int timeout);
+  ```
+  ```c
+  #include<sys/epoll.h>
+  int epoll_create(int size);
+  int epoll_ctl(int epfd, int op, int fd, struct epoll_event * event);
+  int epoll_wait(int epfd, struct epoll_event* events, int maxevents, int timeout);
+  ```
+  - 事件集合  
+    1. select 通过三个参数分别传入感兴趣的可读、可写及异常事件，内核通过对这些参数的在线修改来反馈就绪事件，这使得用户每次调用 select 都需要重置这三个参数  
+    2. poll 统一处理所有事件，只有一个事件集参数。用户通过参数结构体的一个成员传入感兴趣的事件，内核通过另一个成员反馈其中的就绪事件  
+    3. epoll 内核通过一个事件表管理用户感兴趣的所有事件，所以无需反复传入感兴趣的事件，epoll_wait 用一个参数来反馈就绪事件  
+  - 具体实现  
+    select 和 poll 采用轮询的方式，应用程序索引就绪文件描述符的时间复杂度为 O(n)，epoll 采用回调的方式，复杂度是 O(1)
+  - 工作模式  
+    select 和 poll 采用的工作模式是 LT（应用程序可以不立即处理该事件，如果不处理，后续还会再通知该事件），epoll 采用的工作模式是 ET（应用程序必须立即处理该事件，后续不再通知）
+  - 最大支持文件描述符  
+    select 一般有最大值限制， poll 和 epoll 都是 65535
+
 ## 基本概念
 - I/O 模型  
   |I/O模型|读写操作和阻塞阶段|
