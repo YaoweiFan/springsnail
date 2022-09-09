@@ -46,6 +46,11 @@ springsnail 是《Linux 高性能服务器编程》（游双） 附带的项目�
   - 最大支持文件描述符  
     select 一般有最大值限制， poll 和 epoll 都是 65535
 
+- muduo / Tomcat / nginx 并发模式  
+  muduo -- Reactors in threads
+  nginx -- Reactors in processes
+  
+
 ## 基本概念
 - I/O 模型  
   |I/O模型|读写操作和阻塞阶段|
